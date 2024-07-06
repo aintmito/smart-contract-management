@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 //import "hardhat/console.sol";
 
-contract Assessment {
+contract SCM {
     address payable public owner;
     uint256 public balance;
 
