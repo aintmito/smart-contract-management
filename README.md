@@ -31,19 +31,28 @@ pragma solidity ^0.8.9;
 
 //import "hardhat/console.sol";
 
-contract SCM {
+contract Assessment {
     address payable public owner;
     uint256 public balance;
+    uint256 public loanBalance;
 
     event Deposit(uint256 amount);
     event Withdraw(uint256 amount);
+    event LoanTaken(uint256 amount);
+    event LoanPaid(uint256 amount);
 
     constructor(uint initBalance) payable {
         owner = payable(msg.sender);
         balance = initBalance;
+        loanBalance = 0;
     }
 
-    function getBalance() public view returns(uint256){
+    modifier onlyOwner() {
+        require(msg.sender == owner, "You are not the owner of this account");
+        _;
+    }
+
+    function getBalance() public view returns (uint256) {
         return balance;
     }
 
@@ -85,7 +94,35 @@ contract SCM {
         // emit the event
         emit Withdraw(_withdrawAmount);
     }
+
+    function loan(uint256 _loanAmount) public onlyOwner {
+        require(balance >= _loanAmount, "Insufficient contract balance for loan");
+
+        // Update the contract balance and loan balance
+        balance -= _loanAmount;
+        loanBalance += _loanAmount;
+
+        // Emit the loan taken event
+        emit LoanTaken(_loanAmount);
+    }
+
+    function getLoanBalance() public view returns (uint256) {
+        return loanBalance;
+    }
+
+    function payLoan(uint256 _paymentAmount) public onlyOwner {
+        require(_paymentAmount <= loanBalance, "Cannot pay more than the loan balance");
+        require(balance >= _paymentAmount, "Insufficient contract balance to pay loan");
+
+        // Update the contract balance and loan balance
+        balance -= _paymentAmount;
+        loanBalance -= _paymentAmount;
+
+        // Emit the loan paid event
+        emit LoanPaid(_paymentAmount);
+    }
 }
+
 ```
 
 * To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.18" (or another compatible version), and then click on the "Compile MyToken.sol" button.

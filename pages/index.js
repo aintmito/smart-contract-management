@@ -7,6 +7,8 @@ export default function HomePage() {
   const [account, setAccount] = useState(undefined);
   const [atm, setATM] = useState(undefined);
   const [balance, setBalance] = useState(undefined);
+  const [loanBalance, setLoanBalance] = useState(undefined);
+
 
   const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const atmABI = atm_abi.abi;
@@ -59,6 +61,12 @@ export default function HomePage() {
     }
   }
 
+  const getLoanBalance = async() => {
+    if (atm) {
+      setLoanBalance((await atm.getLoanBalance()).toNumber());
+    }
+  }
+
   const deposit = async() => {
     if (atm) {
       let tx = await atm.deposit(1);
@@ -72,6 +80,24 @@ export default function HomePage() {
       let tx = await atm.withdraw(1);
       await tx.wait()
       getBalance();
+    }
+  }
+
+  const loan = async() => {
+    if (atm) {
+      let tx = await atm.loan(1);
+      await tx.wait()
+      getBalance();
+      getLoanBalance();
+    }
+  }
+
+  const payLoan = async() => {
+    if (atm) {
+      let tx = await atm.payLoan(balance);
+      await tx.wait()
+      getBalance();
+      getLoanBalance();
     }
   }
 
@@ -90,12 +116,24 @@ export default function HomePage() {
       getBalance();
     }
 
+    if (loanBalance == undefined) {
+      getLoanBalance();
+    }
+
     return (
       <div>
         <p>Your Account: {account}</p>
         <p>Your Balance: {balance}</p>
+        <p>Your Loan Balance: {loanBalance}</p>
         <button onClick={deposit}>Deposit 1 ETH</button>
         <button onClick={withdraw}>Withdraw 1 ETH</button>
+        <button onClick={loan}>Loan 1 ETH</button>
+        <div>
+          
+          <button onClick={payLoan}>Pay Loan</button>
+        </div>
+        
+
       </div>
     )
   }
